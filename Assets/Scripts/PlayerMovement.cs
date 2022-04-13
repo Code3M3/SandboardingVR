@@ -68,12 +68,13 @@ public class PlayerMovement : MonoBehaviour
         if (leftControllerRotationRef.action.IsPressed())
         {
             Vector3 angularVelocityAverage = GetVectorAverage(angularVelocityFrames);
+            Vector3 velocityAverage = GetVectorAverage(velocityFrames);
             if (angularVelocityAverage != null)
             {
                 Vector3 localAngVelocity = angularVelocityAverage; // total angular velocity
                 int torqueDir;
 
-                if (angularVelocityAverage.x < 0)
+                if (velocityAverage.x < 0)
                 {
                     // right hand stuff
                     torqueDir = 1;
@@ -90,7 +91,7 @@ public class PlayerMovement : MonoBehaviour
 
                 unicornController.RotateUnicorn(rotationForce);
             }
-            }
+        }
 
         if (_rb.velocity.sqrMagnitude > 0.01f)
         {
@@ -125,7 +126,7 @@ public class PlayerMovement : MonoBehaviour
             Vector3 localAngVelocity = angularVelocityAverage; // total angular velocity
             int torqueDir;
             
-            if (angularVelocityAverage.x < 0)
+            if (velocityAverage.x < 0)
                 {
                     // right hand stuff
                     torqueDir = 1;
@@ -159,7 +160,7 @@ public class PlayerMovement : MonoBehaviour
 
             // set velocity at current frame step to equal the crrent velocity and angular velocity of the object's rigidbody
             velocityFrames[currentVelocityFrameStep] = leftControllerVelocity.action.ReadValue<Vector3>();
-            angularVelocityFrames[currentVelocityFrameStep] = leftControllerVelocity.action.ReadValue<Vector3>();
+            angularVelocityFrames[currentVelocityFrameStep] = leftControllerAngularVelocity.action.ReadValue<Vector3>();
         }
     }
 

@@ -592,7 +592,7 @@
                 {
                     "name": "",
                     "id": "98886ca9-6d03-44b9-90b5-e796ab7e4ea2",
-                    "path": "<OculusTouchController>/devicePose/velocity",
+                    "path": "<OculusTouchController>{LeftHand}/devicePose/velocity",
                     "interactions": "",
                     "processors": "",
                     "groups": "Generic XR Controller",
@@ -603,7 +603,7 @@
                 {
                     "name": "",
                     "id": "660b8dc1-46bb-44d4-a635-a23721dfa0ac",
-                    "path": "<OculusTouchController>/devicePose/angularVelocity",
+                    "path": "<OculusTouchController>{LeftHand}/devicePose/angularVelocity",
                     "interactions": "",
                     "processors": "",
                     "groups": "Generic XR Controller",

@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
-public class PhysicsHand : MonoBehaviour
+public class PIDJoint : MonoBehaviour
 {
     [Header("PID")]
     [SerializeField] float frequency = 50f;
     [SerializeField] float damping = 1f;
     [SerializeField] float rotFrequency = 100f;
     [SerializeField] float rotDamping = 0.9f;
-    [SerializeField] Rigidbody playerRigidbody;
+    [SerializeField] Rigidbody playerRigidbodyMovement;
     [SerializeField] public ActionBasedController controller; //target is the controller
     [SerializeField] public GameObject target;
 
@@ -25,6 +25,8 @@ public class PhysicsHand : MonoBehaviour
 
     [Header("Values")]
     [SerializeField] float distance = 50f;
+
+    Vector3 _previousPlayerPosition;
 
     Vector3 _previousPosition;
     Rigidbody _rigidbody;
@@ -50,8 +52,7 @@ public class PhysicsHand : MonoBehaviour
     {
         PIDMovement();
         PIDRotation();
-        // if (_isColliding) HookesLaw(); // make this if iscolliding or isattached
-
+        if (_isColliding) HookesLaw(); 
         DistanceCheck();
     }
 
@@ -71,9 +72,11 @@ public class PhysicsHand : MonoBehaviour
         float g = 1 / (1 + kd * Time.fixedDeltaTime + kp * Time.fixedDeltaTime * Time.fixedDeltaTime);
         float ksg = kp * g;
         float kdg = (kd + kp * Time.fixedDeltaTime) * g;
-        Vector3 force = (target.transform.position - transform.position) * ksg + (playerRigidbody.velocity - _rigidbody.velocity) * kdg;
+        Vector3 forceMovement = (target.transform.position - transform.position) * ksg + ((playerRigidbodyMovement.transform.position - _previousPlayerPosition) - _rigidbody.velocity) * kdg;
 
-        _rigidbody.AddForce(force, ForceMode.Acceleration);
+        _rigidbody.AddForce(forceMovement, ForceMode.Acceleration);
+
+        _previousPlayerPosition = playerRigidbodyMovement.transform.position;
     }
 
     void PIDRotation()
@@ -98,6 +101,17 @@ public class PhysicsHand : MonoBehaviour
 
         _rigidbody.AddTorque(torque, ForceMode.Acceleration);
     }
+    private void OnCollisionEnter(Collision collision)
+    {
+        _isColliding = true;
+        _collision = collision;
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        _isColliding = false;
+        _collision = null;
+    }
 
     public void HookesLaw()
     {
@@ -106,8 +120,8 @@ public class PhysicsHand : MonoBehaviour
 
         float drag = GetDrag();
 
-        playerRigidbody.AddForce(force, ForceMode.Acceleration);
-        playerRigidbody.AddForce(drag * -playerRigidbody.velocity * climbDrag, ForceMode.Acceleration);
+        playerRigidbodyMovement.AddForce(force, ForceMode.Acceleration);
+        playerRigidbodyMovement.AddForce(drag * -playerRigidbodyMovement.velocity * climbDrag, ForceMode.Acceleration);
     }
 
     float GetDrag()
