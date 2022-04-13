@@ -44,14 +44,6 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
-
-        leftControllerMoveRef.action.started += SteerStart;
-    }
-
-    private void SteerStart(InputAction.CallbackContext obj)
-    {
-        _steerStartPos = leftControllerPosition.action.ReadValue<Vector3>();
-        Debug.Log(_steerStartPos);
     }
 
     private void FixedUpdate()
@@ -106,7 +98,6 @@ public class PlayerMovement : MonoBehaviour
         {
             if (velocityAverage != null)
             {
-
                 var leftHandVelocity = velocityAverage;
                 Vector3 localVelocity = leftHandVelocity; // total velocity
                 localVelocity *= -1; // reverse direction

@@ -1,59 +1,81 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
 
-public class PIDJoint : MonoBehaviour
+public class PhysicsHand : MonoBehaviour
 {
     [Header("PID")]
     [SerializeField] float frequency = 50f;
     [SerializeField] float damping = 1f;
     [SerializeField] float rotFrequency = 100f;
     [SerializeField] float rotDamping = 0.9f;
-    [SerializeField] Rigidbody playerRigidbodyMovement;
+    [SerializeField] Rigidbody playerRigidbody;
     [SerializeField] public ActionBasedController controller; //target is the controller
     [SerializeField] public GameObject target;
 
     [Space]
-
+    
     [Header("Springs")]
     [SerializeField] float climbForce = 1000f;
     [SerializeField] float climbDrag = 500f;
 
     [Space]
 
-    [Header("Values")]
-    [SerializeField] float distance = 50f;
+    [Header("Grabbing")]
+    [SerializeField] private Transform grabber;
+    [SerializeField] LayerMask grabbableLayer;
+    [SerializeField] float distance = 5f;
 
-    Vector3 _previousPlayerPosition;
+    [Space]
+
+    [Header("Zipline")]
+    public bool _attachActivated;
 
     Vector3 _previousPosition;
     Rigidbody _rigidbody;
     bool _isColliding;
-
     private Collision _collision;
-    // Start is called before the first frame update
+
+    [HideInInspector] public bool _isAttemptingGrab;
+    GameObject _heldObject;
+    Transform _grabPoint;
+    private FixedJoint _joint1, _joint2;
+
     void Start()
     {
         //Initialization
         transform.position = target.transform.position;
         transform.rotation = target.transform.rotation;
 
+        //Inputs Setup
+        controller.selectAction.action.started += Grab;
+        controller.selectAction.action.canceled += Release;
+
         //Setup
         _rigidbody = GetComponent<Rigidbody>();
 
         _rigidbody.maxAngularVelocity = float.PositiveInfinity;
+        _rigidbody.inertiaTensor = new Vector3(0.008f, 0.008f, 0.008f);
 
         _previousPosition = transform.position;
     }
 
-    private void FixedUpdate()
+    private void OnDestroy()
+    {
+        controller.selectAction.action.started -= Grab;
+        controller.selectAction.action.canceled -= Release;
+    }
+
+    void FixedUpdate()
     {
         PIDMovement();
-        PIDRotation();
-        if (_isColliding) HookesLaw(); 
-        DistanceCheck();
+        PIDRotation(); 
+        if(_isColliding) 
+            HookesLaw(); // make this if iscolliding or isattached
+
+        DistanceCheck(); 
     }
 
     private void DistanceCheck()
@@ -72,9 +94,9 @@ public class PIDJoint : MonoBehaviour
         float g = 1 / (1 + kd * Time.fixedDeltaTime + kp * Time.fixedDeltaTime * Time.fixedDeltaTime);
         float ksg = kp * g;
         float kdg = (kd + kp * Time.fixedDeltaTime) * g;
-        Vector3 forceMovement = (target.transform.position - transform.position) * ksg + ((playerRigidbodyMovement.transform.position - _previousPlayerPosition) - _rigidbody.velocity) * kdg;
-
-        _rigidbody.AddForce(forceMovement, ForceMode.Acceleration);
+        Vector3 force = (target.transform.position - transform.position) * ksg + (playerRigidbody.velocity - _rigidbody.velocity) * kdg;
+        
+        _rigidbody.AddForce(force, ForceMode.Acceleration);
     }
 
     void PIDRotation()
@@ -99,17 +121,6 @@ public class PIDJoint : MonoBehaviour
 
         _rigidbody.AddTorque(torque, ForceMode.Acceleration);
     }
-    private void OnCollisionEnter(Collision collision)
-    {
-        _isColliding = true;
-        _collision = collision;
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        _isColliding = false;
-        _collision = null;
-    }
 
     public void HookesLaw()
     {
@@ -118,8 +129,8 @@ public class PIDJoint : MonoBehaviour
 
         float drag = GetDrag();
 
-        playerRigidbodyMovement.AddForce(force, ForceMode.Acceleration);
-        playerRigidbodyMovement.AddForce(drag * -playerRigidbodyMovement.velocity * climbDrag, ForceMode.Acceleration);
+        playerRigidbody.AddForce(force, ForceMode.Acceleration);
+        playerRigidbody.AddForce(drag * -playerRigidbody.velocity * climbDrag, ForceMode.Acceleration);
     }
 
     float GetDrag()
@@ -133,4 +144,59 @@ public class PIDJoint : MonoBehaviour
         return drag;
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        _isColliding = true;
+        _collision = collision;
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        _isColliding = false;
+        _collision = null;
+    }
+
+    private void Grab(InputAction.CallbackContext context)
+    {
+        _isAttemptingGrab = true;
+        StartCoroutine(TryGrab());
+    }
+
+    IEnumerator TryGrab()
+    {
+        while(_isAttemptingGrab)
+        {
+            if (_collision != null && _collision.gameObject.TryGetComponent(out Rigidbody rb))
+            {
+                AddFixedJoint(rb);
+
+                _attachActivated = true;
+
+                _isAttemptingGrab = false;
+            }
+            yield return null;
+        }
+    }
+
+    public void AddFixedJoint(Rigidbody connectedBody)
+    {
+        FixedJoint joint = _rigidbody.gameObject.AddComponent<FixedJoint>();
+        joint.connectedBody = connectedBody;
+        joint.breakForce = float.PositiveInfinity;
+        joint.breakTorque = float.PositiveInfinity;
+        joint.enableCollision = false;
+    }
+
+    private void Release(InputAction.CallbackContext context)
+    {
+        _isAttemptingGrab = false;
+
+        FixedJoint joint = GetComponent<FixedJoint>();
+        if (joint != null)
+        {
+            _attachActivated = false;
+
+            Destroy(joint);
+        }
+    }
 }
