@@ -20,16 +20,16 @@ public class UnicornController : MonoBehaviour
     {
         // setup
         _rb = GetComponent<Rigidbody>();
+        _rb.maxAngularVelocity = float.PositiveInfinity;
 
         // initialization
         transform.position = sphere.transform.position - new Vector3(0, 0.2f, 0);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         // movement
-        transform.position = sphere.transform.position - new Vector3(0, 0.2f, 0);
+        transform.position = sphere.transform.position;
     }
 
     private void FixedUpdate()
@@ -42,6 +42,15 @@ public class UnicornController : MonoBehaviour
         {
             _rb.AddRelativeTorque(-_rb.angularVelocity * rotationDrag, ForceMode.Acceleration);
         }
+
+        // movement
+        transform.position = sphere.transform.position;
+    }
+
+    private void LateUpdate()
+    {
+        // movement
+        transform.position = sphere.transform.position;
     }
 
     public void RotateUnicorn(float rotationForce)
