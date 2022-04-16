@@ -16,6 +16,6 @@ public class TestAddTorque : MonoBehaviour
 
     private void FixedUpdate()
     {
-        _rb.AddTorque(Vector3.up * .1f, ForceMode.Acceleration);
+        _rb.AddTorque(transform.right * 20f, ForceMode.Acceleration);
     }
 }
