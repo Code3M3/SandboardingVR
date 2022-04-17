@@ -37,7 +37,8 @@ public class PlayerMovement : MonoBehaviour
     Rigidbody _rb;
     float _cooldownTimer;
 
-    Vector3 _steerStartPos; 
+    Quaternion _steerStartRotation;
+    Vector3 _steerStartPosition;
 
     private int currentVelocityFrameStep = 0;
 
@@ -45,6 +46,14 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
+
+        leftControllerMoveRef.action.started += GetOriginalRotationPosition;
+    }
+
+    private void GetOriginalRotationPosition(InputAction.CallbackContext obj)
+    {
+        _steerStartRotation = unicornController.transform.rotation;
+        _steerStartPosition = unicornController.transform.position;
     }
 
     private void FixedUpdate()
@@ -79,23 +88,32 @@ public class PlayerMovement : MonoBehaviour
                 if (localVelocity.sqrMagnitude > minForce * minForce)
                 {
                     // SLIDING MOVEMENT
-                    Vector3 worldVelocity = forwardRef.TransformDirection(localVelocity);
+                    // remap y velocity to right and forward vector
+                    Vector3 worldVelocity = forwardRef.TransformDirection(localVelocity.x + localVelocity.y, localVelocity.y, localVelocity.z + localVelocity.y);
                     _rb.AddForce(worldVelocity * moveForce, ForceMode.Acceleration);
 
                     // ROTATING CHEST RB
 
                     // !!!Important that you use localVel here!!!
                     int TorqueDir = 1;
-                    float rotateForce = localVelocity.magnitude;
 
+                    // subtract difference in player's starting rotation with current rotation from velocity
+                    Quaternion currentSteerRotation = unicornController.transform.rotation;
+                    Quaternion rotationOffset = currentSteerRotation * Quaternion.Inverse(_steerStartRotation);
+
+                    // important to use local velocity here
+                    // times 2 because an important reason that i know intuitively but can't put into words!! figuring out i need the times two ruined me...
+                    if ((rotationOffset * (localVelocity * 2)).x < 0)
+                    {
+                        TorqueDir = -1;
+                    }
+
+                    // adding extra multipliers and clamps for more controlled and intuitive feel
+                    float rotateForce = localVelocity.magnitude;
                     float angularThreshold = .6f;
-                    float angularMultiplier = 1f;
+                    float angularMultiplier;
 
                     Vector3 angVelIgnoreAxis = new Vector3(0, angVelAverage.y, 0);
-                    
-                    float angularYClamp = 0.5f;
-
-                    Vector3 angVelYClamped = new Vector3(0, Mathf.Clamp(angVelIgnoreAxis.y, angularYClamp, -angularYClamp), 0);
 
                     if (angVelIgnoreAxis.magnitude - angularThreshold < 0)
                     {
@@ -106,12 +124,7 @@ public class PlayerMovement : MonoBehaviour
                         angularMultiplier = angVelIgnoreAxis.magnitude - angularThreshold;
                     }
 
-                    if (localVelocity.x < 0)
-                    {
-                        TorqueDir = -1;
-                    }
-
-                    unicornController.RotateUnicorn(TorqueDir*rotateForce*angularMultiplier* 10);
+                    unicornController.RotateUnicorn(TorqueDir * rotateForce * angularMultiplier);
 
                     _cooldownTimer = 0f;
                 }

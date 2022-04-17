@@ -11,7 +11,7 @@ public class UnicornController : MonoBehaviour
 
     [Header("steering")]
     // NOTE: make sure scales are all zeroed out (1,1,1) to prevent mesh deformation
-    [SerializeField] float rotationDrag = 50f;
+    [SerializeField] float rotationDrag = 5f;
 
     Rigidbody _rb;
 

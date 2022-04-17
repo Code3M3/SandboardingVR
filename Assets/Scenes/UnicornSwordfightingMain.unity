@@ -3819,7 +3819,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sphere: {fileID: 3202580673295365497}
   gravity: -4
-  rotationDrag: 50
+  rotationDrag: 5
 --- !u!153 &3202580673295365502
 ConfigurableJoint:
   m_ObjectHideFlags: 0
