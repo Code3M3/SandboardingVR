@@ -138,6 +138,7 @@ GameObject:
   - component: {fileID: 1999218}
   - component: {fileID: 1999212}
   - component: {fileID: 1999215}
+  - component: {fileID: 1999217}
   m_Layer: 6
   m_Name: LocomotionSphere
   m_TagString: Untagged
@@ -329,6 +330,44 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1999217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1999210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad5b987e37df912458688be2b3c1fff0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveForce: 100
+  dragForce: 1
+  steerForce: 2
+  minForce: 0
+  minTimeBetweenStrokes: 0
+  velocityFrames:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  angularVelocityFrames:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  leftControllerMoveRef: {fileID: -6131295136447488360, guid: db7f80608b9284a40aa62b103ad4c99d, type: 3}
+  leftControllerVelocity: {fileID: -3104969879651177996, guid: db7f80608b9284a40aa62b103ad4c99d, type: 3}
+  leftControllerPosition: {fileID: 0}
+  leftControllerRotationRef: {fileID: -5982496924579745919, guid: db7f80608b9284a40aa62b103ad4c99d, type: 3}
+  leftControllerAngularVelocity: {fileID: -7769468865725475157, guid: db7f80608b9284a40aa62b103ad4c99d, type: 3}
+  rightControllerMoveRef: {fileID: 0}
+  rightControllerVelocity: {fileID: 0}
+  forwardRef: {fileID: 1014919319}
+  unicornController: {fileID: 1014919326}
 --- !u!54 &1999218
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -545,7 +584,7 @@ MeshCollider:
   m_GameObject: {fileID: 291736748}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   m_Convex: 1
   m_CookingOptions: 30
@@ -1731,7 +1770,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 0.990566, g: 0.94592756, b: 0.9017889, a: 1}
-  m_Intensity: 1
+  m_Intensity: 0.54
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -1806,7 +1845,6 @@ GameObject:
   - component: {fileID: 736063435}
   - component: {fileID: 736063440}
   - component: {fileID: 736063439}
-  - component: {fileID: 736063441}
   - component: {fileID: 736063437}
   - component: {fileID: 736063436}
   m_Layer: 6
@@ -1908,20 +1946,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 736063434}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &736063441
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 736063434}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44e9a30c87918f147a31d80f35a99f72, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sphere: {fileID: 0}
-  yOffset: 0.05
 --- !u!1 &808730543
 GameObject:
   m_ObjectHideFlags: 0
@@ -1999,6 +2023,7 @@ GameObject:
   - component: {fileID: 1014919323}
   - component: {fileID: 1014919324}
   - component: {fileID: 1014919325}
+  - component: {fileID: 1014919326}
   m_Layer: 6
   m_Name: Chest (Main RB)
   m_TagString: Untagged
@@ -2207,6 +2232,21 @@ ConstantForce:
   m_RelativeForce: {x: 0, y: 0, z: 0}
   m_Torque: {x: 0, y: 0, z: 0}
   m_RelativeTorque: {x: 0, y: 0, z: 0}
+--- !u!114 &1014919326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1014919318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1882533b591fc040b85bf9525edb234, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sphere: {fileID: 1014919323}
+  gravity: 10
+  rotationDrag: 50
 --- !u!1 &1201285208
 GameObject:
   m_ObjectHideFlags: 0
@@ -2364,7 +2404,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh20076
+  m_Name: pb_Mesh20102
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2624,7 +2664,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh20244
+  m_Name: pb_Mesh20262
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -8957,7 +8997,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4295846435986532504
 Transform:
   m_ObjectHideFlags: 0
