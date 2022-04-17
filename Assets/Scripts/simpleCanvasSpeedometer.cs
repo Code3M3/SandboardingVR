@@ -2,12 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class simpleCanvasSpeedometer : MonoBehaviour
 {
     public Text speedText;
     [SerializeField] Rigidbody playerRB;
+    [SerializeField] InputActionReference leftControllerVelocity;
 
     String originalText;
 
@@ -23,6 +25,6 @@ public class simpleCanvasSpeedometer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        speedText.text = originalText + playerRB.velocity.magnitude.ToString("F0");
+        speedText.text = originalText + playerRB.velocity.magnitude.ToString("F0") + "\n" + leftControllerVelocity.action.ReadValue<Vector3>();
     }
 }

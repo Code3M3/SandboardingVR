@@ -20,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
     public Vector3[] angularVelocityFrames;
 
     [Header("player references")]
+    [SerializeField] GameObject leftController;
     [SerializeField] InputActionReference leftControllerMoveRef;
     [SerializeField] InputActionReference leftControllerVelocity;
     [SerializeField] InputActionReference leftControllerPosition;
@@ -57,34 +58,6 @@ public class PlayerMovement : MonoBehaviour
             AddVelocityHistory();
         }
 
-        if (leftControllerRotationRef.action.IsPressed())
-        {
-            Vector3 angularVelocityAverage = GetVectorAverage(angularVelocityFrames);
-            Vector3 velocityAverage = GetVectorAverage(velocityFrames);
-            if (angularVelocityAverage != null)
-            {
-                Vector3 localAngVelocity = angularVelocityAverage; // total angular velocity
-                int torqueDir;
-
-                if (velocityAverage.x < 0)
-                {
-                    // right hand stuff
-                    torqueDir = 1;
-                }
-                else
-                {
-                    //left hand stuff
-                    torqueDir = -1;
-                }
-                // if average isn't 0, set new rotation in the unicorn controller
-                Vector3 worldAngVelocity = forwardRef.TransformDirection(localAngVelocity);
-                float angularMagnitude = worldAngVelocity.magnitude;
-                float rotationForce = angularMagnitude * 25 * torqueDir;
-
-                unicornController.RotateUnicorn(rotationForce);
-            }
-        }
-
         if (_rb.velocity.sqrMagnitude > 0.01f)
         {
             _rb.AddForce(-_rb.velocity * dragForce, ForceMode.Acceleration);
@@ -94,6 +67,7 @@ public class PlayerMovement : MonoBehaviour
     void AddVelocityHistory()
     {
         Vector3 velocityAverage = GetVectorAverage(velocityFrames);
+        Vector3 angVelAverage = GetVectorAverage(angularVelocityFrames);
         if (velocityFrames != null)
         {
             if (velocityAverage != null)
@@ -104,37 +78,44 @@ public class PlayerMovement : MonoBehaviour
 
                 if (localVelocity.sqrMagnitude > minForce * minForce)
                 {
+                    // SLIDING MOVEMENT
                     Vector3 worldVelocity = forwardRef.TransformDirection(localVelocity);
                     _rb.AddForce(worldVelocity * moveForce, ForceMode.Acceleration);
+
+                    // ROTATING CHEST RB
+
+                    // !!!Important that you use localVel here!!!
+                    int TorqueDir = 1;
+                    float rotateForce = localVelocity.magnitude;
+
+                    float angularThreshold = .6f;
+                    float angularMultiplier = 1f;
+
+                    Vector3 angVelIgnoreAxis = new Vector3(0, angVelAverage.y, 0);
+                    
+                    float angularYClamp = 0.5f;
+
+                    Vector3 angVelYClamped = new Vector3(0, Mathf.Clamp(angVelIgnoreAxis.y, angularYClamp, -angularYClamp), 0);
+
+                    if (angVelIgnoreAxis.magnitude - angularThreshold < 0)
+                    {
+                        angularMultiplier = 0f;
+                    }
+                    else
+                    {
+                        angularMultiplier = angVelIgnoreAxis.magnitude - angularThreshold;
+                    }
+
+                    if (localVelocity.x < 0)
+                    {
+                        TorqueDir = -1;
+                    }
+
+                    unicornController.RotateUnicorn(TorqueDir*rotateForce*angularMultiplier* 10);
 
                     _cooldownTimer = 0f;
                 }
             }
-        }
-        Vector3 angularVelocityAverage = GetVectorAverage(angularVelocityFrames);
-        if (angularVelocityAverage != null)
-        {
-            Vector3 localAngVelocity = angularVelocityAverage; // total angular velocity
-            int torqueDir;
-            
-            if (velocityAverage.x < 0)
-                {
-                    // right hand stuff
-                    torqueDir = 1;
-                }
-            else
-                {
-                    //left hand stuff
-                    torqueDir = -1;
-                }
-            // if average isn't 0, set new rotation in the unicorn controller
-            Vector3 worldAngVelocity = forwardRef.TransformDirection(localAngVelocity);
-            float angularMagnitude = worldAngVelocity.magnitude;
-            float rotationForce = angularMagnitude * steerForce * torqueDir;
-
-            unicornController.RotateUnicorn(rotationForce);
-
-            Debug.Log("angular: "+angularVelocityAverage);
         }
     }
 
