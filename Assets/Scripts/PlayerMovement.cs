@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -37,10 +38,13 @@ public class PlayerMovement : MonoBehaviour
     Rigidbody _rb;
     float _cooldownTimer;
 
+    Vector3 _previousPosition;
+
     Quaternion _steerStartRotation;
     Vector3 _steerStartPosition;
 
     private int currentVelocityFrameStep = 0;
+
 
     // Start is called before the first frame update
     void Start()
@@ -48,6 +52,12 @@ public class PlayerMovement : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
 
         leftControllerMoveRef.action.started += GetOriginalRotationPosition;
+        leftControllerMoveRef.action.canceled += ClearVelocities;
+    }
+
+    private void ClearVelocities(InputAction.CallbackContext obj)
+    {
+        ResetVelocityHistory();
     }
 
     private void GetOriginalRotationPosition(InputAction.CallbackContext obj)
@@ -56,7 +66,7 @@ public class PlayerMovement : MonoBehaviour
         _steerStartPosition = unicornController.transform.position;
     }
 
-    private void FixedUpdate()
+    public void PlayerMove()
     {
         VelocityUpdate();
 
@@ -73,6 +83,9 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void FixedUpdate()
+    {
+    }
     void AddVelocityHistory()
     {
         Vector3 velocityAverage = GetVectorAverage(velocityFrames);
@@ -81,15 +94,14 @@ public class PlayerMovement : MonoBehaviour
         {
             if (velocityAverage != null)
             {
-                var leftHandVelocity = velocityAverage;
-                Vector3 localVelocity = leftHandVelocity; // total velocity
+                Vector3 localVelocity = velocityAverage; // total velocity
                 localVelocity *= -1; // reverse direction
 
                 if (localVelocity.sqrMagnitude > minForce * minForce)
                 {
                     // SLIDING MOVEMENT
                     // remap y velocity to right and forward vector
-                    Vector3 worldVelocity = forwardRef.TransformDirection(localVelocity.x + localVelocity.y, localVelocity.y, localVelocity.z + localVelocity.y);
+                    Vector3 worldVelocity = forwardRef.TransformDirection(localVelocity.x + localVelocity.y, 0 , localVelocity.z + localVelocity.y);
                     _rb.AddForce(worldVelocity * moveForce, ForceMode.Acceleration);
 
                     // ROTATING CHEST RB
@@ -113,7 +125,7 @@ public class PlayerMovement : MonoBehaviour
                     float angularThreshold = .6f;
                     float angularMultiplier;
 
-                    Vector3 angVelIgnoreAxis = new Vector3(0, angVelAverage.y, 0);
+                    Vector3 angVelIgnoreAxis = new Vector3(0, angVelAverage.y, angVelAverage.z/2);
 
                     if (angVelIgnoreAxis.magnitude - angularThreshold < 0)
                     {

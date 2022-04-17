@@ -5,10 +5,12 @@ using UnityEngine;
 public class update : MonoBehaviour
 {
     [SerializeField] public GameObject physicsParent;
+    [SerializeField] public Vector3 offset;
 
     // Start is called before the first frame update
-    private void LateUpdate()
+    public void UpdateCamPos()
     {
-        transform.position = physicsParent.transform.position;
+        transform.position = physicsParent.transform.position + offset;
+        transform.rotation = physicsParent.transform.rotation;
     }
 }

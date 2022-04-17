@@ -14,6 +14,7 @@ public class UnicornController : MonoBehaviour
     [SerializeField] float rotationDrag = 5f;
 
     Rigidbody _rb;
+    Vector3 _previousPosition;
 
     // Start is called before the first frame update
     void Start()
