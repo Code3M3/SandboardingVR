@@ -101,7 +101,7 @@ public class PlayerMovement : MonoBehaviour
                 {
                     // SLIDING MOVEMENT
                     // remap y velocity to right and forward vector
-                    Vector3 worldVelocity = forwardRef.TransformDirection(localVelocity.x + localVelocity.y, 0 , localVelocity.z + localVelocity.y);
+                    Vector3 worldVelocity = forwardRef.TransformDirection(localVelocity.x, localVelocity.y, localVelocity.z + localVelocity.y);
                     _rb.AddForce(worldVelocity * moveForce, ForceMode.Acceleration);
 
                     // ROTATING CHEST RB
