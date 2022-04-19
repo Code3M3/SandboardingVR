@@ -25,10 +25,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _Glossiness: 0.5
-    - _Height: 80
+    - _Height: 40
     - _Metallic: 0
     - _SphereSize: 0.03
-    - _Width: 80
+    - _Width: 40
     m_Colors:
-    - _Color: {r: 0.15699537, g: 0.368697, b: 0.5283019, a: 1}
+    - _Color: {r: 0, g: 0, b: 0, a: 1}
+    - _DotColor: {r: 0.5566038, g: 0.5566038, b: 0.5566038, a: 1}
   m_BuildTextureStacks: []
