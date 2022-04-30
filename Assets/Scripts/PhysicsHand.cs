@@ -6,6 +6,15 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class PhysicsHand : MonoBehaviour
 {
+    public MovementState state;
+    public enum MovementState
+    {
+        grounded,
+        wallGliding,
+        inair
+    }
+    public bool wallGliding;
+
     [Header("PID")]
     [SerializeField] float frequency = 50f;
     [SerializeField] float damping = 1f;
@@ -62,6 +71,20 @@ public class PhysicsHand : MonoBehaviour
         _previousPosition = transform.position;
     }
 
+    private void Update()
+    {
+        StateHandler();
+    }
+
+    private void StateHandler()
+    {
+        // Mode - WallGliding
+        if(wallGliding)
+        {
+            state = MovementState.wallGliding;
+        }
+    }
+
     private void OnDestroy()
     {
         controller.selectAction.action.started -= Grab;
@@ -71,9 +94,11 @@ public class PhysicsHand : MonoBehaviour
     void FixedUpdate()
     {
         PIDMovement();
-        PIDRotation(); 
-        if(_isColliding) 
-            HookesLaw(); // make this if iscolliding or isattached
+        PIDRotation();
+
+        // Dynamic spring attached to player body
+        if (_isColliding || state == MovementState.wallGliding) 
+            HookesLaw(); // make this if iscolliding or isattached or wallgliding
 
         DistanceCheck(); 
     }

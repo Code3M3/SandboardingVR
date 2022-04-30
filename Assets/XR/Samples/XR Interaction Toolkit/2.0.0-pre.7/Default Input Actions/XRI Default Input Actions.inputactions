@@ -592,7 +592,7 @@
                 {
                     "name": "",
                     "id": "98886ca9-6d03-44b9-90b5-e796ab7e4ea2",
-                    "path": "<OculusTouchController>{LeftHand}/pointer/velocity",
+                    "path": "<OculusTouchController>/devicePose/velocity",
                     "interactions": "",
                     "processors": "",
                     "groups": "Generic XR Controller",
